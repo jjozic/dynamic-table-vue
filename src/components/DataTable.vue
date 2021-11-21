@@ -38,7 +38,7 @@
                       type="number"
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6">
+                  <v-col v-show="isNew" cols="12" sm="6">
                     <v-text-field
                       v-model="editedItem.name"
                       label="Name"
@@ -51,7 +51,7 @@
                       type="date"
                     ></v-text-field>
                   </v-col>
-                  <v-col v-show="isNew" cols="12" sm="6">
+                  <v-col cols="12" sm="6">
                     <v-text-field
                       v-model="editedItem.inventory"
                       label="Inventory Level"
