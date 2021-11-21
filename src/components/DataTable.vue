@@ -2,7 +2,8 @@
   <v-data-table
     :headers="headers"
     :items="vegetables"
-    sort-by="calories"
+    :search="search"
+    sort-by="sku"
     class="elevation-1"
   >
     <template v-slot:top>
@@ -10,10 +11,16 @@
         <v-toolbar-title>Vegetables</v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
+         <v-text-field
+          v-model="search"
+          label="Search"
+          single-line
+          hide-details
+        ></v-text-field>
         <v-dialog v-model="dialog" max-width="500px">
           <template v-slot:activator="{ on, attrs }">
             <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-              New Item
+              Add
             </v-btn>
           </template>
           <v-card>
@@ -24,10 +31,11 @@
             <v-card-text>
               <v-container>
                 <v-row>
-                  <v-col cols="12" sm="6">
+                  <v-col v-show="isNew" cols="12" sm="6">
                     <v-text-field
                       v-model="editedItem.sku"
                       label="SKU"
+                      type="number"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6">
@@ -40,12 +48,14 @@
                     <v-text-field
                       v-model="editedItem.expiryDate"
                       label="Best-Before Date"
+                      type="date"
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6">
+                  <v-col v-show="isNew" cols="12" sm="6">
                     <v-text-field
                       v-model="editedItem.inventory"
                       label="Inventory Level"
+                      type="number"
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -79,7 +89,6 @@
       </v-toolbar>
     </template>
     <template v-slot:[`item.actions`]="{ item }">
-    <!-- <template > -->
       <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
       <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
     </template>
@@ -94,6 +103,7 @@ export default {
   data: () => ({
     dialog: false,
     dialogDelete: false,
+    search: '',
     headers: [
       { text: 'SKU', value: 'sku' },
       { text: 'Name', value: 'name' },
@@ -104,24 +114,25 @@ export default {
     vegetables: [],
     editedIndex: -1,
     editedItem: {
+      sku: 0,
       name: '',
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
+      expiryDate: new Date().toISOString().substr(0, 10),
+      inventory: 0,
     },
     defaultItem: {
+      sku: 0,
       name: '',
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
+      expiryDate: new Date().toISOString().substr(0, 10),
+      inventory: 0,
     },
   }),
 
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? 'New Item' : 'Edit Item';
+    },
+    isNew() {
+      return this.editedIndex === -1;
     },
   },
 
@@ -145,44 +156,44 @@ export default {
         {
           sku: 1234,
           name: 'Carrots',
-          expiryDate: '20.12.2021',
+          expiryDate: '2021-12-20',
           inventory: 240,
         },
         {
           sku: 4567,
           name: 'Potatoes',
-          expiryDate: '20.10.2021',
+          expiryDate: '2021-10-20',
           inventory: 140,
         },
         {
           sku: 4321,
           name: 'Corn',
-          expiryDate: '20.08.2021',
+          expiryDate: '2021-08-20',
           inventory: 40,
         },
         {
           sku: 2416,
           name: 'Cucumber',
-          expiryDate: '16.07.2021',
+          expiryDate: '2021-07-16',
           inventory: 80,
         },
       ];
     },
 
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
+      this.editedIndex = this.vegetables.indexOf(item);
       this.editedItem = { ...item };
       this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
+      this.editedIndex = this.vegetables.indexOf(item);
       this.editedItem = { ...item };
       this.dialogDelete = true;
     },
 
     deleteItemConfirm() {
-      this.desserts.splice(this.editedIndex, 1);
+      this.vegetables.splice(this.editedIndex, 1);
       this.closeDelete();
     },
 
@@ -204,9 +215,9 @@ export default {
 
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem);
+        Object.assign(this.vegetables[this.editedIndex], this.editedItem);
       } else {
-        this.desserts.push(this.editedItem);
+        this.vegetables.push(this.editedItem);
       }
       this.close();
     },
